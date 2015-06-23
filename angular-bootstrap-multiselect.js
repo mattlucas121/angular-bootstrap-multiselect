@@ -176,32 +176,23 @@ angular.module("ui.multiselect", ["multiselect.tpl.html"])
 						scope.uncheckAll();
 						item.checked = !item.checked;
 					}
-					setModelValue(false);
+					setModelValue();
 				}
 
 				function selectMultiple(item) {
 					item.checked = !item.checked;
-					setModelValue(true);
+					setModelValue();
 				}
 
-				function setModelValue(isMultiple) {
+				function setModelValue() {
 					var value;
+					value = [];
+					angular.forEach(scope.items, function(item) {
+						if(item.checked) {
+							value.push(item.model);
+						}
+					});
 
-					if(isMultiple) {
-						value = [];
-						angular.forEach(scope.items, function(item) {
-							if(item.checked) {
-								value.push(item.model);
-							}
-						});
-					} else {
-						angular.forEach(scope.items, function(item) {
-							if(item.checked) {
-								value = item.model;
-								return false;
-							}
-						});
-					}
 					modelCtrl.$setViewValue(value);
 				}
 
@@ -236,14 +227,14 @@ angular.module("ui.multiselect", ["multiselect.tpl.html"])
 					angular.forEach(scope.items, function(item) {
 						item.checked = true;
 					});
-					setModelValue(true);
+					setModelValue();
 				};
 
 				scope.uncheckAll = function() {
 					angular.forEach(scope.items, function(item) {
 						item.checked = false;
 					});
-					setModelValue(true);
+					setModelValue();
 				};
 
 				scope.select = function(event, item) {
