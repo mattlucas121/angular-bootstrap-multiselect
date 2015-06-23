@@ -32,6 +32,7 @@ angular.module("ui.multiselect", ["multiselect.tpl.html"])
 				var exp = attrs.options;
 				var parsedResult = optionParser.parse(exp);
 				var isMultiple = attrs.multiple ? true : false;
+				var charCutOff = parseInt(attrs.charcutoff) || 25;
 				var compareByKey = attrs.compareBy;
 				var scrollAfterRows = attrs.scrollAfterRows;
 				var required = false;
@@ -147,7 +148,6 @@ angular.module("ui.multiselect", ["multiselect.tpl.html"])
 							}
 						});
 
-						var charCutOff = 15;
 						if (scope.header.length > charCutOff) {
 							if (scope.header.substr(scope.header.length - 1) == ',') {
 								scope.header = scope.header.substring(0,charCutOff - 2) + '...';
