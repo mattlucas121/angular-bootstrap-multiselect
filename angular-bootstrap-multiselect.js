@@ -127,17 +127,34 @@ angular.module("ui.multiselect", ["multiselect.tpl.html"])
 						return scope.header;
 					}
 
-					if(isMultiple) {
-						if(attrs.msSelected) {
-							scope.header = $interpolate(attrs.msSelected)(scope);
-						} else {
-							scope.header = modelCtrl.$modelValue.length + " " + "selected";
-						}
-
+					if(attrs.msSelected) {
+						scope.header = $interpolate(attrs.msSelected)(scope);
 					} else {
 						var local = {};
-						local[parsedResult.itemName] = modelCtrl.$modelValue;
-						scope.header = parsedResult.viewMapper(local);
+						scope.header = '';
+
+						if (typeof modelCtrl.$modelValue === 'string') {
+							scope.header = modelCtrl.$modelValue;
+							return scope.header;
+						}
+
+						angular.forEach(modelCtrl.$modelValue, function (item, index) {
+							local[parsedResult.itemName] = item;
+							scope.header += parsedResult.viewMapper(local);
+
+							if (index < (modelCtrl.$modelValue.length - 1)) {
+								scope.header += ', '
+							}
+						});
+
+						var charCutOff = 15;
+						if (scope.header.length > charCutOff) {
+							if (scope.header.substr(scope.header.length - 1) == ',') {
+								scope.header = scope.header.substring(0,charCutOff - 2) + '...';
+							} else {
+								scope.header = scope.header.substring(0, charCutOff - 1) + '...';
+							}
+						}
 					}
 				}
 
@@ -176,17 +193,17 @@ angular.module("ui.multiselect", ["multiselect.tpl.html"])
 						scope.uncheckAll();
 						item.checked = !item.checked;
 					}
-					setModelValue();
+					setModelValue(false);
 				}
 
 				function selectMultiple(item) {
 					item.checked = !item.checked;
-					setModelValue();
+					setModelValue(true);
 				}
 
-				function setModelValue() {
-					var value;
-					value = [];
+				function setModelValue(isMultiple) {
+					var value = [];
+
 					angular.forEach(scope.items, function(item) {
 						if(item.checked) {
 							value.push(item.model);
@@ -227,14 +244,14 @@ angular.module("ui.multiselect", ["multiselect.tpl.html"])
 					angular.forEach(scope.items, function(item) {
 						item.checked = true;
 					});
-					setModelValue();
+					setModelValue(true);
 				};
 
 				scope.uncheckAll = function() {
 					angular.forEach(scope.items, function(item) {
 						item.checked = false;
 					});
-					setModelValue();
+					setModelValue(true);
 				};
 
 				scope.select = function(event, item) {
@@ -296,15 +313,15 @@ angular.module("ui.multiselect", ["multiselect.tpl.html"])
 
 angular.module("multiselect.tpl.html", []).run(["$templateCache", function($templateCache) {
 	$templateCache.put("multiselect.tpl.html",
-			"<div class=\"btn-group\">\n" +
-			"  <button type=\"button\" class=\"btn btn-default dropdown-toggle\" ng-click=\"toggleSelect()\" ng-disabled=\"disabled\" ng-class=\"{'error': !valid()}\">\n" +
-			"    {{header}} <span class=\"caret\"></span>\n" +
-			"  </button>\n" +
-			"  <ul class=\"dropdown-menu\" style=\"margin-bottom:30px;padding-left:5px;padding-right:5px;\" ng-style=\"ulStyle\">\n" +
-			"    <li data-stopPropagation=\"true\" ng-repeat=\"i in items\">\n" +
-			"      <a ng-click=\"select($event, i)\" style=\"padding:3px 10px;cursor:pointer;\">\n" +
-			"        <i class=\"glyphicon\" ng-class=\"{'glyphicon-ok': i.checked, 'empty': !i.checked}\"></i> {{i.label}}</a>\n" +
-			"    </li>\n" +
-			"  </ul>\n" +
-			"</div>");
+		"<div class=\"btn-group\">\n" +
+		"  <button type=\"button\" class=\"btn btn-default dropdown-toggle\" ng-click=\"toggleSelect()\" ng-disabled=\"disabled\" ng-class=\"{'error': !valid()}\">\n" +
+		"    {{header}} <span class=\"caret\"></span>\n" +
+		"  </button>\n" +
+		"  <ul class=\"dropdown-menu\" style=\"margin-bottom:30px;padding-left:5px;padding-right:5px;\" ng-style=\"ulStyle\">\n" +
+		"    <li data-stopPropagation=\"true\" ng-repeat=\"i in items\">\n" +
+		"      <a ng-click=\"select($event, i)\" style=\"padding:3px 10px;cursor:pointer;\">\n" +
+		"        <i class=\"glyphicon\" ng-class=\"{'glyphicon-ok': i.checked, 'empty': !i.checked}\"></i> {{i.label}}</a>\n" +
+		"    </li>\n" +
+		"  </ul>\n" +
+		"</div>");
 }]);
